@@ -26,6 +26,8 @@ app.get("/", (req, res) => {
   res.send("<h1>Welcome blog NPRU blog restful API</h1>");
 });
 
+app.use("/uploads", express.static(__dirname + "/uploads"));
+
 //use router
 app.use("/api/v1/auth", userRouter);
 app.use("/api/v1/post", postRouter);
