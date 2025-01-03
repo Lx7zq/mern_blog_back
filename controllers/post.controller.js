@@ -20,7 +20,7 @@ exports.createPost = async (req, res) => {
       title,
       summary,
       content,
-      cover: path,
+      cover: req.file.firebaseUrl,
       author,
     });
     if (!postDoc) {
@@ -123,8 +123,7 @@ exports.updatePost = async (req, res) => {
     postDoc.summary = summary;
     postDoc.content = content;
     if (req.file) {
-      const { path } = req.file;
-      postDoc.cover = path;
+      postDoc.cover = req.file.firebaseUrl;
     }
     await postDoc.save();
     res.json(postDoc);
