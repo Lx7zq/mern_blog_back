@@ -16,8 +16,9 @@ router.post(
 router.get("", postController.getPosts);
 //http://localhost:5000/api/v1/post/id
 router.get("/:id", postController.getPostsById);
+router.get("/author/:id", postController.getPostByAuthor);
 //http://localhost:5000/api/v1/post/id
 router.delete("/:id", authJwt.verifyToken, postController.deletePost);
 //http://localhost:5000/api/v1/post/id
-router.put("/:id", authJwt.verifyToken, upload, postController.updatePost);
+router.put("/:id", authJwt.verifyToken, upload, uploadToFirebase, postController.updatePost);
 module.exports = router;

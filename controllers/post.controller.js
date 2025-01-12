@@ -87,37 +87,48 @@ exports.deletePost = async (req, res) => {
   const authorId = req.userId;
   try {
     const postDoc = await PostModel.findById(id);
-    if (authorId === postDoc.author.toString()) {
-      res.status(403).send({
-        message: "You can't delete this post",
+
+    if (!postDoc) {
+      return res.status(404).send({
+        message: "Post not found",
       });
-      return;
     }
-    await postDoc.deleteOne();
-    res.json(postDoc);
+
+    if (authorId !== postDoc.author.toString()) {
+      return res.status(403).send({
+        message: "You are not authorized to delete this post",
+      });
+    }
+
+    await PostModel.findByIdAndDelete(id);
+
+    res.status(200).send({
+      message: "Post deleted successfully",
+    });
   } catch (error) {
+    console.error(error.message);
     res.status(500).send({
-      message:
-        error.message || "Something error occurred while deleting a post",
+      message: error.message || "An error occurred while deleting the post",
     });
   }
 };
 
 exports.updatePost = async (req, res) => {
   const { id } = req.params;
-  if (!id) return res.status(404).json({ message: "Post id is not provided" });
   const authorId = req.userId;
+  if (!id) return res.status(404).json({ message: "Post id is not Provided" });
   try {
     const postDoc = await PostModel.findById(id);
-    if (authorId === postDoc.author.toString()) {
+    if (authorId !== postDoc.author.toString()) {
       res.status(403).send({
-        message: "You can't update this post",
+        message: "You Cannnot update this post",
       });
       return;
     }
+
     const { title, summary, content } = req.body;
     if (!title || !summary || !content) {
-      return res.status(404).json({ message: "All fields is required" });
+      return res.status(400).json({ message: "All fields are required" });
     }
     postDoc.title = title;
     postDoc.summary = summary;
@@ -130,7 +141,28 @@ exports.updatePost = async (req, res) => {
   } catch (error) {
     res.status(500).send({
       message:
-        error.message || "Something error occurred while updating a post",
+        error.message || "Somthing error occurrend white updating a post",
     });
   }
 };
+
+exports.getPostByAuthor = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const postDoc = await PostModel.find({ author: id }).populate("author", [
+      "username",
+    ]);
+    if (!postDoc) {
+      res.status(404).send({
+        message: "Post notfound",
+      });
+      return;
+    }
+    res.json(postDoc);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).send({
+      message: "Something error occurred while getting post by author",
+    });
+  }
+}
